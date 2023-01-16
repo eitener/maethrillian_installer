@@ -3,6 +3,7 @@ import io
 import requests
 import zipfile
 import xml.etree.ElementTree as ET
+import rich.console
 
 # not sure if I need to set this dynamically
 VERSION = '1_11_2931_2'
@@ -15,6 +16,7 @@ class ModManager:
 	def __init__(self, appData) -> None:
 		self.localStateDir = os.path.join(appData, HW2_HOGAN_PATH)
 		self.version = VERSION
+		self.mod_package = self.get_latest_mod()
 		if os.path.isdir(self.localPkgDir(VERSION_PTR)):
 			self.version = VERSION_PTR
 		
@@ -51,20 +53,16 @@ class ModManager:
 			root = tree.getroot()
 			published_utc = int(root.get('published_utc'))
 		else:
-			print("No current mod installed")
+			print(f"No mod detected in the specified installation directory.\n {self.localPkgDir}")
 			return False
-		latest_mod = self.get_latest_mod()
-		if latest_mod is not None:
-			for name in latest_mod.namelist():
-				print(name)
+		if self.mod_package is not None:
+			for name in self.mod_package.namelist():
 				if os.path.splitext(name)[1] == '.xml':
-					with latest_mod.open(name) as myfile:
+					with self.mod_package.open(name) as myfile:
 						remote_manifest = myfile.read()
-						print(remote_manifest)
 						remote_root = ET.fromstring(remote_manifest)
 						remote_published_utc = int(remote_root.get('published_utc'))
 						if remote_published_utc > published_utc:
-							print('I am here')
 							return False
 						else:
 							return True
@@ -87,21 +85,20 @@ class ModManager:
 		return "Mod removed."
 
 	def install_mod(self):
-		mod_package = self.get_latest_mod()
-		if mod_package is not None:
+		if self.mod_package is not None:
 			os.makedirs(self.localPkgDir(), exist_ok=True)
-			for name in mod_package.namelist():
+			for name in self.mod_package.namelist():
 				if os.path.splitext(name)[1] == '.pkg':
 					mod_w_path = self.localPkgPath()
 				else:
 					mod_w_path = self.localManifestPath()
 
-				with mod_package.open(name) as myfile:
+				with self.mod_package.open(name) as myfile:
 					with open(mod_w_path, 'wb') as f:
 						f.write(myfile.read())
-			print("Mod installation complete.")
+			return "Mod installation complete."
 		else:
-			print("Unable to install mod.")
+			return "Unable to install mod."
 
 	def status(self):
 		if os.path.isdir(self.localPkgDir()):
@@ -122,6 +119,13 @@ class ModManager:
 
 if __name__ == '__main__':
 	
+	console = rich.console.Console()
+	console.print("=========================================", style="bold italic dodger_blue3")
+	console.print("=========================================", style="bold italic steel_blue3")
+	console.print("=========================================", style="bold italic royal_blue1")
+	console.print("=========================================", style="bold italic blue_violet")
+	console.print("[bold italic purple4]\\\ Maethrillian >[/] start")
+	
 	# initialize mod manager
 	appData = os.environ.get('LOCALAPPDATA', -1)
 
@@ -130,23 +134,24 @@ if __name__ == '__main__':
 		input('Press any key to quit...')
 
 	mod_manager = ModManager(appData)
-
-	print("(I)nstall, (U)ninstall, (S)tatus, (Q)uit");
-
+	menu_counter = 0
+	
 	while True:
+		if menu_counter % 4 == 0:
+			console.print("\n(I)nstall, (U)ninstall, (S)tatus, (Q)uit", style="bold dodger_blue3 underline")
 		cmdKey = input('Enter key: ')
-
+		menu_counter += 1
 		if cmdKey == 'i' or cmdKey == 'I':
 			mod_manager.mod_cleanup()
-			mod_manager.install_mod()
+			console.print(mod_manager.install_mod(), style="bright_green")
 		elif cmdKey == 'u' or cmdKey == 'U':
-			print(mod_manager.mod_cleanup())
+			console.print(mod_manager.mod_cleanup(), style="bright_green")
 		elif cmdKey == 's' or cmdKey == 'S':
-			print(mod_manager.status())
+			console.print(mod_manager.status(), style="bright_green")
 		elif cmdKey == 'q' or cmdKey == 'Q':
 			quit()
 		else:
-			print('bad key')
+			console.print('BAD KEY', style="red")
 
 
 
