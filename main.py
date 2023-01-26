@@ -1,4 +1,5 @@
 import os
+import sys
 import io
 import requests
 import zipfile
@@ -126,8 +127,8 @@ def	type_write(console: rich.console.Console, text: str, wpm: int = 40, cnsl_sty
 	"""
 	for char in text:
 		console.print(char, end='', style=cnsl_style)
-		speed = 60 / (wpm * 7)
-		time.sleep(random.uniform(0.5*speed, 1.5*speed))
+		speed = 60 / (wpm * 6)
+		time.sleep(random.uniform(0.25*speed, 1.5*speed))
 	time.sleep(0.4)
 	console.line()
 
@@ -168,17 +169,17 @@ if __name__ == '__main__':
 		menu_counter += 1
 		if cmdKey == 'i' or cmdKey == 'I':
 			mod_manager.mod_cleanup()
-			type_write(console, mod_manager.install_mod(), 80)
+			type_write(console, mod_manager.install_mod(), 100)
 		elif cmdKey == 'u' or cmdKey == 'U':
-			type_write(console, mod_manager.mod_cleanup(), 80)
+			type_write(console, mod_manager.mod_cleanup(), 100)
 		elif cmdKey == 's' or cmdKey == 'S':
-			type_write(console, mod_manager.status(), 80)
+			type_write(console, mod_manager.status(), 100)
 		elif cmdKey == 'd' or cmdKey == 'D':
 			print_discord_link(console)
 		elif cmdKey == 'q' or cmdKey == 'Q':
-			quit()
+			sys.exit()
 		else:
-			type_write(console, 'BAD KEY', 80, "red")
+			type_write(console, 'BAD KEY', 100, "red")
 
 
 
