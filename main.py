@@ -4,6 +4,9 @@ import requests
 import zipfile
 import xml.etree.ElementTree as ET
 import rich.console
+import webbrowser
+import time
+import random
 
 # not sure if I need to set this dynamically
 VERSION = '1_11_2931_2'
@@ -117,15 +120,37 @@ class ModManager:
 			return "HW2 local app data not found."
 
 
+def	type_write(console: rich.console.Console, text: str, wpm: int = 40, cnsl_style: str = "bright_green"):
+	"""
+	Slowly writes text to console with a random time interval between each character
+	"""
+	for char in text:
+		console.print(char, end='', style=cnsl_style)
+		speed = 60 / (wpm * 7)
+		time.sleep(random.uniform(0.5*speed, 1.5*speed))
+	time.sleep(0.4)
+	console.line()
+
+def print_discord_link(console: rich.console.Console):
+	discord_invite = "https://discord.gg/kyS82ZB"		
+	type_write(console, f'Opening... {discord_invite}', 60)
+	time.sleep(1.5)
+	webbrowser.open(discord_invite, new=2)
+
 if __name__ == '__main__':
 	
+	# print cosole header
 	console = rich.console.Console()
 	console.print("=========================================", style="bold italic dodger_blue3")
 	console.print("=========================================", style="bold italic steel_blue3")
 	console.print("=========================================", style="bold italic royal_blue1")
 	console.print("=========================================", style="bold italic blue_violet")
-	console.print("[bold italic purple4]\\\ Maethrillian >[/] start")
-	
+	time.sleep(0.8)
+	console.print(" .\Maethrillian> ", style="bold italic purple4", end='')
+	time.sleep(0.8)
+	#type_write(console, " .\Maethrillian> ", 100, "bold italic purple4")
+	type_write(console, "start", 60)
+
 	# initialize mod manager
 	appData = os.environ.get('LOCALAPPDATA', -1)
 
@@ -138,20 +163,22 @@ if __name__ == '__main__':
 	
 	while True:
 		if menu_counter % 4 == 0:
-			console.print("\n(I)nstall, (U)ninstall, (S)tatus, (Q)uit", style="bold dodger_blue3 underline")
+			console.print("\n(I)nstall, (U)ninstall, (S)tatus, (D)iscord, (Q)uit", style="bold dodger_blue3 underline")
 		cmdKey = input('Enter key: ')
 		menu_counter += 1
 		if cmdKey == 'i' or cmdKey == 'I':
 			mod_manager.mod_cleanup()
-			console.print(mod_manager.install_mod(), style="bright_green")
+			type_write(console, mod_manager.install_mod(), 80)
 		elif cmdKey == 'u' or cmdKey == 'U':
-			console.print(mod_manager.mod_cleanup(), style="bright_green")
+			type_write(console, mod_manager.mod_cleanup(), 80)
 		elif cmdKey == 's' or cmdKey == 'S':
-			console.print(mod_manager.status(), style="bright_green")
+			type_write(console, mod_manager.status(), 80)
+		elif cmdKey == 'd' or cmdKey == 'D':
+			print_discord_link(console)
 		elif cmdKey == 'q' or cmdKey == 'Q':
 			quit()
 		else:
-			console.print('BAD KEY', style="red")
+			type_write(console, 'BAD KEY', 80, "red")
 
 
 
